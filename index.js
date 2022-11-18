@@ -2,32 +2,154 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
+const ObjectId = require("mongodb").ObjectId;
 
 // Creating express app
 const app = express();
 
-// Creating middlewares
-app.use(cors());
-app.use(express.json());
-
-// Connect to mongodb for digial krishi khamar
+// Connect to mongodb
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://db_user_pritam:${process.env.DB_PASS}@cluster0.xrzq7vz.mongodb.net/?retryWrites=true&w=majority`;
+
+// routes
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  const collection = client.db("test").collection("devices");
-  console.log("Adhunik krishi khamar db connected");
-  // perform actions on the collection object
-  client.close();
-});
 
-// Simple  get request for testing
+// Creating middlewares
+app.use(cors());
+app.use(express.json());
+
+// CONNETIN TO  DB AND CREATING REST APIS
+async function run() {
+  try {
+    await client.connect();
+    console.log("db is connected");
+    const database = client.db("AdhunikKrishiKhamar");
+    // Create collections
+    const agroGibCollection = database.collection("Agro-gib");
+    const recentNewsColletion = database.collection("All-recent-news");
+    const otherNewsCollection = database.collection("Other-news-collection");
+    const goveshonaTipsCollection = database.collection("Goveshona-tips");
+    const farmToProkritiCollection = database.collection("Farm-to-Prokriti");
+    const digitalTechnologiesCollection =
+      database.collection("Digital-technology");
+
+    // get request for  getting agro-gibs  from sever
+    app.get("/agros", async (req, res) => {
+      const result = await agroGibCollection.find({}).toArray();
+      res.json(result);
+    });
+
+    // get  api for loading single agro gib  information
+    app.get("/agros/:id", async (req, res) => {
+      const agroId = req.params.id;
+      const query = { _id: ObjectId(agroId) };
+      const result = await agroGibCollection.findOne(query);
+      res.json(result);
+    });
+
+    // get api for loading all  new nes
+    app.get("/recentNews", async (req, res) => {
+      const result = await recentNewsColletion.find({}).toArray();
+      res.json(result);
+    });
+
+    // get api for loading single  new  news details
+    app.get("/recentNews/:id", async (req, res) => {
+      const newsId = req.params.id;
+      const query = { _id: ObjectId(newsId) };
+      const result = await recentNewsColletion.findOne(query);
+      res.json(result);
+    });
+
+    // get  api for  loading other news
+    app.get("/otherNews", async (req, res) => {
+      const result = await otherNewsCollection.find({}).toArray();
+      res.json(result);
+    });
+
+    // get api for loading single other news information
+    app.get("/otherNews/:id", async (req, res) => {
+      const newsId = req.params.id;
+      const query = { _id: ObjectId(newsId) };
+      const result = await otherNewsCollection.findOne(query);
+      res.json(result);
+    });
+
+    // get  api for  laoding all  goveshona  tips
+    app.get("/goveshonaTips", async (req, res) => {
+      const result = await goveshonaTipsCollection.find({}).toArray();
+      res.json(result);
+    });
+
+    // get api for loading single goveshona tips
+    app.get("/goveshonaTips/:id", async (req, res) => {
+      const tipsId = req.params.id;
+      const query = { _id: ObjectId(tipsId) };
+      const result = await otherNewsCollection.findOne(query);
+      res.json(result);
+    });
+
+    // get  api for loading all farm to prokriti
+    app.get("/farmToPakhriti", async (req, res) => {
+      const result = await farmToProkritiCollection.find({}).toArray();
+      res.json(result);
+    });
+
+    // get api for loading single farom  to prokriti details
+    app.get("/goveshonaTips/:id", async (req, res) => {
+      const farmId = req.params.id;
+      const query = { _id: ObjectId(farmId) };
+      const result = await farmToProkritiCollection.findOne(query);
+      res.json(result);
+    });
+
+    // get api for showing  6  digital  technologies (ECOM)
+    // get request cycles from home
+    app.get("/digitalTechnologies", async (req, res) => {
+      const result = await bicycleCollection.find({}).limit(6).toArray();
+      res.json(result);
+    });
+
+    // get api for loading all digital technologies (ECOM)
+    app.get("/digitalTechnologies", async (req, res) => {
+      const result = await bicycleCollection.find({}).toArray();
+      res.json(result);
+    });
+
+    // get  api for loadin  single digital technology details
+    app.get("/digitalTechnologies/:id", async (req, res) => {
+      const techId = req.params.id;
+      const query = { _id: ObjectId(techId) };
+      const result = await digitalTechnologiesCollection.findOne(query);
+      res.json(result);
+    });
+
+    // delete api  for admin to delete  a single  digital  technology
+    app.delete("/bicycles/:id", async (req, res) => {
+      const techId = req.params.id;
+      const query = { _id: ObjectId(techId) };
+      const result = await digitalTechnologiesCollection.deleteOne(query);
+      res.json(result);
+    });
+
+    // post api for  admin to create a digital technology
+     app.post("/addTechnology", async (req, res) => {
+      const newTech = req.body;
+      const result = await bicycleCollection.insertOne(newTech);
+      res.json(result);
+    });
+    app.delete("/digital");
+  } finally {
+    // await client.close()
+  }
+}
+run().catch(console.dir());
 app.get("/", (req, res) => {
-  res.send(`Sever is  running on port ${port}`);
+  res.send(`Server is  running on port ${port}`);
 });
 
 // Listening the app  on port -5000
