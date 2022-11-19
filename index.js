@@ -29,13 +29,24 @@ async function run() {
     console.log("db is connected");
     const database = client.db("AdhunikKrishiKhamar");
     // Create collections
+    const userCollection = database.collection("User-collection");
     const agroGibCollection = database.collection("Agro-gib");
     const recentNewsColletion = database.collection("All-recent-news");
     const otherNewsCollection = database.collection("Other-news-collection");
     const goveshonaTipsCollection = database.collection("Goveshona-tips");
     const farmToProkritiCollection = database.collection("Farm-to-Prokriti");
-    const digitalTechnologiesCollection =
-      database.collection("Digital-technology");
+    const digitalTechnologiesCollection = database.collection(
+      "Digital-technologies"
+    );
+
+    // RES-APIS
+
+    // post api for saving user info
+    app.post("/users", async (req, res) => {
+      const userInfo = req.body;
+      const result = await userCollection.insertOne(userInfo);
+      res.json(result);
+    });
 
     // get request for  getting agro-gibs  from sever
     app.get("/agros", async (req, res) => {
@@ -110,39 +121,52 @@ async function run() {
     // get api for showing  6  digital  technologies (ECOM)
     // get request cycles from home
     app.get("/digitalTechnologies", async (req, res) => {
-      const result = await bicycleCollection.find({}).limit(6).toArray();
+      const result = await digitalTechnologiesCollection
+        .find({})
+        .limit(6)
+        .toArray();
       res.json(result);
     });
 
     // get api for loading all digital technologies (ECOM)
-    app.get("/digitalTechnologies", async (req, res) => {
-      const result = await bicycleCollection.find({}).toArray();
+    app.get("/digitalTechnologies/all", async (req, res) => {
+      console.log("hitted server");
+      const result = await digitalTechnologiesCollection.find({}).toArray();
       res.json(result);
     });
 
     // get  api for loadin  single digital technology details
     app.get("/digitalTechnologies/:id", async (req, res) => {
       const techId = req.params.id;
+      console.log(`Hitted the server ${techId}`);
       const query = { _id: ObjectId(techId) };
       const result = await digitalTechnologiesCollection.findOne(query);
       res.json(result);
     });
 
     // delete api  for admin to delete  a single  digital  technology
-    app.delete("/bicycles/:id", async (req, res) => {
+    app.delete("/digitalTechnologies/:id", async (req, res) => {
       const techId = req.params.id;
+
       const query = { _id: ObjectId(techId) };
       const result = await digitalTechnologiesCollection.deleteOne(query);
       res.json(result);
     });
 
     // post api for  admin to create a digital technology
-     app.post("/addTechnology", async (req, res) => {
+    app.post("/addTechnology", async (req, res) => {
       const newTech = req.body;
-      const result = await bicycleCollection.insertOne(newTech);
+      const result = await digitalTechnologiesCollection.insertOne(newTech);
       res.json(result);
     });
-    app.delete("/digital");
+
+    // delete api for admin to delete  a digital technology
+    app.delete("/technologies/delete/:id", async (req, res) => {
+      const techId = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await digitalTechnologiesCollection.deleteOne(query);
+      res.json(result);
+    });
   } finally {
     // await client.close()
   }
