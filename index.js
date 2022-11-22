@@ -167,6 +167,13 @@ async function run() {
       const result = await digitalTechnologiesCollection.deleteOne(query);
       res.json(result);
     });
+
+    // post api for adding a cylcle by admin
+    app.post("/addProduct", async (req, res) => {
+      const newBiycle = req.body;
+      const result = await digitalTechnologiesCollection.insertOne(newBiycle);
+      res.json(result);
+    });
   } finally {
     // await client.close()
   }
